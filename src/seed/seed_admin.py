@@ -4,7 +4,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.users.models import UserModel, UserRole
 from src.utils.security import hash_password
 from src.utils.settings import settings
-
+from src.users.models import UserModel, UserRole
+from src.jobs.models import Category, Company, Job
 
 async def create_admin(db: AsyncSession):
     try:
@@ -62,3 +63,14 @@ async def create_admin(db: AsyncSession):
 
         print(f"Error during admin seeding: {e}")
         raise
+
+if __name__ == "__main__":
+    import asyncio
+
+    from src.utils.database import DB_Session
+
+    async def main():
+        async with DB_Session() as db:
+            await create_admin(db)
+
+    asyncio.run(main())

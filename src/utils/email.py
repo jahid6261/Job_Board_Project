@@ -84,3 +84,50 @@ Job Board Team
         email_subject="Your Job Board Password Reset OTP",
         email_body=email_body,
     )
+
+
+
+def send_employer_approved_email(
+    to_email: str,
+    first_name: str,
+):
+    email_body = f"""
+Hello {first_name},
+
+Congratulations!
+
+Your request to become an employer on Job Board has been approved.
+
+You can now login to your account and use employer features.
+
+Best regards,
+Job Board Team
+"""
+
+    return email_utility(
+        email_to=to_email,
+        email_subject="Your Employer Request Has Been Approved",
+        email_body=email_body,
+    )
+
+
+def send_employer_rejected_email(
+    to_email: str,
+    first_name: str,
+):
+    email_body = f"""
+Hello {first_name},
+
+We are sorry to inform you that your request to become an employer on Job Board has been rejected.
+
+You can submit a new employer request in the future.
+
+Best regards,
+Job Board Team
+"""
+
+    return email_utility(
+        email_to=to_email,
+        email_subject="Your Employer Request Has Been Rejected",
+        email_body=email_body,
+    )

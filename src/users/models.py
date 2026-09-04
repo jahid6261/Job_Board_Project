@@ -50,6 +50,17 @@ class UserModel(DBModel):
         cascade="all, delete-orphan",
     )
 
+    companies = relationship("Company", back_populates="employer", cascade="all, delete-orphan")
+    jobs = relationship("Job", back_populates="employer", cascade="all, delete-orphan")
+
+
+    employer_request = relationship(
+    "EmployerRequest",
+    back_populates="user",
+    uselist=False,
+    cascade="all, delete-orphan",
+)
+
     created_at = Column(
         DateTime(timezone=True),
         server_default=func.now(),
@@ -107,3 +118,27 @@ class PasswordResetOTP(DBModel):
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
     user = relationship("UserModel", back_populates="reset_otps")
+
+
+
+class EmployerRequestStatus(enum.Enum):
+    pending = "pending"
+    approved = "approved"
+    rejected = "rejected"
+
+
+class EmployerRequest(DBModel):
+    __tablename__ = "employer_requests"
+    id = Column(Integer, primary_key=True, index=True)
+
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), 
+                     nullable=False, index=True)
+    reason = Column(String(500), nullable=True)
+    status = Column(Enum(EmployerRequestStatus), 
+                    default=EmployerRequestStatus.pending, nullable=False)
+
+    
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    
+    user = relationship("UserModel", back_populates="employer_request")
