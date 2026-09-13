@@ -52,14 +52,18 @@ class UserModel(DBModel):
 
     companies = relationship("Company", back_populates="employer", cascade="all, delete-orphan")
     jobs = relationship("Job", back_populates="employer", cascade="all, delete-orphan")
+    employer_request = relationship("EmployerRequest", back_populates="user", 
+                                    uselist=False, cascade="all, delete-orphan")
+    resumes = relationship("Resume", back_populates="job_seeker", cascade="all, delete-orphan")
+    applications = relationship("ApplicationModel", back_populates="job_seeker")
+    status_changes = relationship("ApplicationStatusHistory", back_populates="changed_by_user")
 
 
-    employer_request = relationship(
-    "EmployerRequest",
-    back_populates="user",
-    uselist=False,
-    cascade="all, delete-orphan",
-)
+    
+ 
+
+
+ 
 
     created_at = Column(
         DateTime(timezone=True),
@@ -72,6 +76,7 @@ class UserModel(DBModel):
         onupdate=func.now(),
     )
 
+   
 
 class PasswordResetToken(DBModel):
 

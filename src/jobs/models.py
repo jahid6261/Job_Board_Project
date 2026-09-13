@@ -87,4 +87,10 @@ class Job(DBModel):
     employer = relationship("UserModel", back_populates="jobs")
     company = relationship("Company", back_populates="jobs")
     category = relationship("Category", back_populates="jobs")
-   
+    applications = relationship(
+    "ApplicationModel",
+    back_populates="job",
+    cascade="all, delete-orphan",
+)
+
+    

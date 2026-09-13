@@ -131,3 +131,66 @@ Job Board Team
         email_subject="Your Employer Request Has Been Rejected",
         email_body=email_body,
     )
+
+
+
+def send_application_accepted_email(
+    to_email: str,
+    first_name: str,
+    application_id: int,
+    job_title: str,
+    company_name: str,
+):
+    email_body = f"""
+Hello {first_name},
+
+Congratulations!
+
+Your job application has been accepted.
+
+Application ID: #{application_id}
+
+Job: {job_title}
+Company: {company_name}
+
+The employer has accepted your application.
+
+Best regards,
+Job Board Team
+"""
+
+    return email_utility(
+        email_to=to_email,
+        email_subject=f"Application Accepted - {job_title}",
+        email_body=email_body,
+    )
+
+
+def send_application_rejected_email(
+    to_email: str,
+    first_name: str,
+    application_id: int,
+    job_title: str,
+    company_name: str,
+):
+    email_body = f"""
+Hello {first_name},
+
+We are sorry to inform you that your job application has been rejected.
+
+Application ID: #{application_id}
+
+Job: {job_title}
+Company: {company_name}
+
+Thank you for your interest and for taking the time to apply.
+
+Best regards,
+Job Board Team
+"""
+
+    return email_utility(
+        email_to=to_email,
+        email_subject=f"Application Rejected - {job_title}",
+        email_body=email_body,
+    )

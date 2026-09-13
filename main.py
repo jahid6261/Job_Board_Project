@@ -4,6 +4,7 @@ import uvicorn
 from src.users.routers import users_router
 from src.jobs.routers import categories_router,company_router,jobs_router
 from src.Admin.routers import employers_router,admin_employers_router
+from src.applications.routers import resume_router,application_router
 
 app=FastAPI()
 
@@ -13,6 +14,8 @@ api_v1.include_router(users_router)
 api_v1.include_router(categories_router)
 api_v1.include_router(company_router)
 api_v1.include_router(jobs_router)
+api_v1.include_router(resume_router)
+api_v1.include_router(application_router)
 api_v1.include_router(employers_router)
 api_v1.include_router(admin_employers_router)
 
