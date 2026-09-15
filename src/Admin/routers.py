@@ -4,7 +4,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.depends.auth_depends import (
     get_current_user,
     get_current_admin,
+    get_current_employer,
 )
+
 from src.utils.database import get_db
 
 from src.Admin.schemas import (
@@ -20,20 +22,20 @@ from src.Admin.services import (
     get_pending_employer_requests,
     get_employer_request_details,
     action_employer_request,
+    get_employer_dashboard,
+    get_admin_dashboard,
 )
 
+from src.users.models import UserModel
 
 
-
-employers_router = APIRouter(
+employer_requests_router = APIRouter(
     prefix="/employer-requests",
     tags=["Employer Requests"],
 )
 
 
-
-
-@employers_router.post(
+@employer_requests_router.post(
     "",
     response_model=EmployerRequestResponseSchema,
     status_code=status.HTTP_201_CREATED,
@@ -50,9 +52,7 @@ async def create_employer_request_api(
     )
 
 
-
-
-@employers_router.get(
+@employer_requests_router.get(
     "/me",
     response_model=EmployerRequestResponseSchema,
 )
@@ -66,16 +66,24 @@ async def get_my_employer_request_api(
     )
 
 
+@employer_requests_router.get("/dashboard")
+async def get_employer_dashboard_api(
+    current_user: UserModel = Depends(get_current_employer),
+    db: AsyncSession = Depends(get_db),
+):
+    return await get_employer_dashboard(
+        employer_id=current_user.id,
+        db=db,
+    )
 
-admin_employers_router = APIRouter(
+
+admin_employer_requests_router = APIRouter(
     prefix="/admin/employer-requests",
     tags=["Admin Employer Requests"],
 )
 
 
-
-
-@admin_employers_router.get(
+@admin_employer_requests_router.get(
     "",
     response_model=list[EmployerRequestAdminResponseSchema],
 )
@@ -88,11 +96,7 @@ async def get_pending_employer_requests_api(
     )
 
 
-# =============================
-# 4. Admin gets one request details
-# =================================
-
-@admin_employers_router.get(
+@admin_employer_requests_router.get(
     "/{request_id}",
     response_model=EmployerRequestAdminResponseSchema,
 )
@@ -107,11 +111,7 @@ async def get_employer_request_details_api(
     )
 
 
-# ===================================
-# 5. Admin approves / rejects request
-# =====================================
-
-@admin_employers_router.patch(
+@admin_employer_requests_router.patch(
     "/{request_id}",
     response_model=EmployerRequestResponseSchema,
 )
@@ -126,3 +126,11 @@ async def action_employer_request_api(
         request_id=request_id,
         action=action,
     )
+
+
+@admin_employer_requests_router.get("/dashboard")
+async def get_admin_dashboard_api(
+    db: AsyncSession = Depends(get_db),
+    current_admin: UserModel = Depends(get_current_admin),
+):
+    return await get_admin_dashboard(db)

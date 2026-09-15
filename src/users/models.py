@@ -36,12 +36,8 @@ class UserModel(DBModel):
     is_active = Column(Boolean, default=False, nullable=False)
     activation_token = Column(String, nullable=True)
 
-    # Password reset token relationship
-    reset_tokens = relationship(
-        "PasswordResetToken",
-        back_populates="user",
-        cascade="all, delete-orphan",
-    )
+   
+ 
 
     # Password reset OTP relationship
     reset_otps = relationship(
@@ -78,27 +74,6 @@ class UserModel(DBModel):
 
    
 
-class PasswordResetToken(DBModel):
-
-    __tablename__ = "password_reset_tokens"
-
-    id = Column(Integer, primary_key=True, index=True)
-
-    user_id = Column(
-        Integer,
-        ForeignKey(
-            "users.id",
-            ondelete="CASCADE",
-        ),
-        nullable=False,
-        index=True,
-    )
-
-    token_hash = Column(String(64), unique=True, nullable=False)
-    expires_at = Column(DateTime(timezone=True), nullable=False)
-    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
-
-    user = relationship("UserModel", back_populates="reset_tokens")
 
 
 class PasswordResetOTP(DBModel):

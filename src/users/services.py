@@ -14,6 +14,7 @@ from src.users.schemas import (
     UserRegistrationRequest,
     UserLoginRequest,
     LoginResponse,
+    UpdateProfileRequest,
 )
 
 from src.utils.security import (
@@ -184,8 +185,68 @@ async def login(
     )
 
 
-async def profile(user: UserModel):
+async def get_profile(
+    user_id: int,
+    db: AsyncSession,
+):
+    result = await db.execute(
+        select(UserModel).where(UserModel.id == user_id)
+    )
+
+    user = result.scalar_one_or_none()
+
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+
     return user
+       
+
+async def update_profile(request:UpdateProfileRequest,user_id:int,db:AsyncSession):
+
+    result= await db.execute(
+        select(UserModel).where(
+            UserModel.id==user_id
+        )
+    )
+
+
+    
+    user = result.scalar_one_or_none()
+
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+
+    if request.first_name is not None:
+        user.first_name = request.first_name.strip()
+
+    if request.last_name is not None:
+        user.last_name = request.last_name.strip()
+
+    if request.number is not None:
+        user.number = request.number.strip()
+
+    if request.address is not None:
+        user.address = request.address.strip()
+
+    try:
+        await db.commit()
+        await db.refresh(user)
+
+    except Exception:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error"
+        )
+
+    return user
+
 
 
 

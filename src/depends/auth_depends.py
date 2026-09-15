@@ -110,19 +110,3 @@ async def get_current_job_seeker(
 
     return current_user
 
-
-def require_role(*allowed_roles: UserRole):
-
-    async def dependency(
-        current_user: UserModel = Depends(get_current_user),
-    ) -> UserModel:
-
-        if current_user.role not in allowed_roles:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="You don't have permission to access this resource.",
-            )
-
-        return current_user
-
-    return dependency

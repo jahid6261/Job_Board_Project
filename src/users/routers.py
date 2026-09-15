@@ -13,12 +13,14 @@ from src.users.schemas import (
     ForgotPasswordRequest,
     ResetPasswordRequest,
     ChangePasswordRequest,
+    UpdateProfileRequest
 )
 from src.users.services import (
     register,
     activate_account_service,
     login,
-    profile,
+    get_profile,
+    update_profile 
 )
 from src.utils.database import get_db
 
@@ -52,9 +54,28 @@ async def user_login(
 @users_router.get("/profile", response_model=UserProfileResponse)
 async def user_profile(
     current_user: UserModel = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ):
-    return await profile(current_user)
+    return await get_profile(
+        user_id=current_user.id,
+        db=db,
+    )
 
+
+@users_router.patch(
+    "/profile",
+    response_model=UserProfileResponse
+)
+async def update_user_profile(
+    request: UpdateProfileRequest,
+    current_user: UserModel = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    return await update_profile(
+        user_id=current_user.id,
+        request=request,
+        db=db,
+    )
 
 @users_router.post("/forgot-password", status_code=status.HTTP_200_OK)
 async def forgot_password(

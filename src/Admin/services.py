@@ -1,5 +1,5 @@
 from fastapi import HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import select,func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -15,6 +15,9 @@ from .schemas import (
     EmployerRequestCreateSchema,
 )
 
+
+from src.jobs.models import Job,Company
+from src.applications.models import Resume,ApplicationModel,ApplicationStatus,ApplicationStatusHistory
 from src.utils.email import( send_employer_approved_email,send_employer_rejected_email)
 
 # ============================================================
@@ -266,3 +269,112 @@ async def action_employer_request(
     await db.refresh(employer_request)
 
     return employer_request
+
+
+
+
+##----------------------
+# get admin dashboard
+##---------------------
+
+
+async def get_admin_dashboard(db: AsyncSession):
+
+    total_job_seekers = await db.scalar(
+        select(func.count(UserModel.id)).where(
+            UserModel.role == UserRole.job_seeker
+        )
+    )
+
+    total_employers = await db.scalar(
+        select(func.count(UserModel.id)).where(
+            UserModel.role == UserRole.employer
+        )
+    )
+
+    total_jobs = await db.scalar(
+        select(func.count(Job.id))
+    )
+
+    total_companies = await db.scalar(
+        select(func.count(Company.id))
+    )
+
+    total_applications = await db.scalar(
+        select(func.count(ApplicationModel.id))
+    )
+
+    pending_employer_requests = await db.scalar(
+        select(func.count(EmployerRequest.id)).where(
+            EmployerRequest.status == EmployerRequestStatus.pending
+        )
+    )
+
+    return {
+        "total_job_seekers": total_job_seekers or 0,
+        "total_employers": total_employers or 0,
+        "total_jobs": total_jobs or 0,
+        "total_companies": total_companies or 0,
+        "total_applications": total_applications or 0,
+        "pending_employer_requests": pending_employer_requests or 0,
+    }
+
+
+###--------------------------
+# get emploer dashbaored
+
+###-------------------------
+
+async def get_employer_dashboard(
+    employer_id: int,
+    db: AsyncSession,
+):
+
+    total_jobs = await db.scalar(
+        select(func.count(Job.id)).where(
+            Job.employer_id == employer_id
+        )
+    )
+
+    total_applications = await db.scalar(
+        select(func.count(ApplicationModel.id))
+        .join(Job, ApplicationModel.job_id == Job.id)
+        .where(
+            Job.employer_id == employer_id
+        )
+    )
+
+    pending_applications = await db.scalar(
+        select(func.count(ApplicationModel.id))
+        .join(Job, ApplicationModel.job_id == Job.id)
+        .where(
+            Job.employer_id == employer_id,
+            ApplicationModel.status == ApplicationStatus.PENDING,
+        )
+    )
+
+    accepted_applications = await db.scalar(
+        select(func.count(ApplicationModel.id))
+        .join(Job, ApplicationModel.job_id == Job.id)
+        .where(
+            Job.employer_id == employer_id,
+            ApplicationModel.status == ApplicationStatus.ACCEPTED,
+        )
+    )
+
+    rejected_applications = await db.scalar(
+        select(func.count(ApplicationModel.id))
+        .join(Job, ApplicationModel.job_id == Job.id)
+        .where(
+            Job.employer_id == employer_id,
+            ApplicationModel.status == ApplicationStatus.REJECTED,
+        )
+    )
+
+    return {
+        "total_jobs": total_jobs or 0,
+        "total_applications": total_applications or 0,
+        "pending_applications": pending_applications or 0,
+        "accepted_applications": accepted_applications or 0,
+        "rejected_applications": rejected_applications or 0,
+    }

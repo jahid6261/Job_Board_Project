@@ -48,10 +48,10 @@ class UserProfileResponse(BaseModel):
 
 
 class UpdateProfileRequest(BaseModel):
-    first_name: str
-    last_name: str
-    number: str
-    address: str
+    first_name: str | None=None
+    last_name: str | None=None
+    number: str | None=None
+    address: str | None=None
 
 
 class ForgotPasswordRequest(BaseModel):
