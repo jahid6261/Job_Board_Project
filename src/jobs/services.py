@@ -1,4 +1,4 @@
-from  sqlalchemy import select,update,delete
+from  sqlalchemy import select,update,delete,or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import HTTPException, status
 from sqlalchemy.orm import selectinload
@@ -428,18 +428,57 @@ async def create_job(
     return job
 
 
-async def get_all_jobs(db: AsyncSession):
-    result = await db.execute(
+
+async def get_all_jobs(
+    db: AsyncSession,
+    search: str | None = None,
+    category_id: int | None = None,
+    location: str | None = None,
+    page: int = 1,
+    limit: int = 10,
+):
+    query = (
         select(Job)
         .options(
             selectinload(Job.company),
             selectinload(Job.category),
         )
-        .order_by(Job.created_at.desc())
     )
+
+    # Search
+    if search:
+        query = query.where(
+            or_(
+                Job.title.ilike(f"%{search}%"),
+                Job.description.ilike(f"%{search}%"),
+            )
+        )
+
+    # Category filter
+    if category_id:
+        query = query.where(
+            Job.category_id == category_id
+        )
+
+    # Location filter
+    if location:
+        query = query.where(
+            Job.location.ilike(f"%{location}%")
+        )
+
+    # Pagination
+    offset = (page - 1) * limit
+
+    query = (
+        query
+        .order_by(Job.created_at.desc())
+        .offset(offset)
+        .limit(limit)
+    )
+
+    result = await db.execute(query)
+
     return result.scalars().all()
-
-
 
 async def get_job_details(db: AsyncSession, job_id: int):
     result = await db.execute(

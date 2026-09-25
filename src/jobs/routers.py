@@ -203,12 +203,23 @@ async def create_job_api(
     )
 
 
-
-@jobs_router.get("", response_model=list[JobResponseSchema])
-async def get_all_jobs_api(
+@jobs_router.get("/jobs")
+async def get_jobs(
+    search: str | None = None,
+    category_id: int | None = None,
+    location: str | None = None,
+    page: int = 1,
+    limit: int = 10,
     db: AsyncSession = Depends(get_db),
 ):
-    return await services.get_all_jobs(db)
+    return await services. get_all_jobs(
+        db=db,
+        search=search,
+        category_id=category_id,
+        location=location,
+        page=page,
+        limit=limit,
+    )
 
 
 @jobs_router.get("/{job_id}", response_model=JobResponseSchema)
