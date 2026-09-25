@@ -6,6 +6,7 @@ from src.utils.security import hash_password
 from src.utils.settings import settings
 from src.users.models import UserModel, UserRole
 from src.jobs.models import Category, Company, Job
+from src.applications.models import Resume,ApplicationModel,ApplicationStatusHistory
 
 async def create_admin(db: AsyncSession):
     try:
